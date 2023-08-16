@@ -17,12 +17,16 @@ internal class Program
 
         channel.QueueDeclare("hello-queue", true, false, false);
 
-        string message = "Hello World!";
+        Enumerable.Range(1, 50).ToList().ForEach(x =>
+        {
+            string message = $"Message {x}";
 
-        var messageBody = Encoding.UTF8.GetBytes(message);
-        channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
+            var messageBody = Encoding.UTF8.GetBytes(message);
+            channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
 
-        Console.WriteLine("Mesaj gönderilmiştir.");
+            Console.WriteLine($"Mesaj gönderilmiştir : {message}");
+        });
+
         Console.ReadLine();
     }
 }

@@ -15,15 +15,22 @@ internal class Program
 
         var channel = connection.CreateModel();
 
+        channel.BasicQos(0, 1, false);
+        //herbir subs. bir mesaj gönderecek.
+
         var consumer = new EventingBasicConsumer(channel);
 
-        channel.BasicConsume("hello-queue", true, consumer);
+        channel.BasicConsume("hello-queue", false, consumer);
 
-        consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+        consumer.Received += (sender,e) =>
         {
             var message = Encoding.UTF8.GetString(e.Body.ToArray());
 
+            Thread.Sleep(1500);
+
             Console.WriteLine("Gelen Mesaj: " + message);
+
+            channel.BasicAck(e.DeliveryTag, false);
         };
 
         Console.ReadLine();
