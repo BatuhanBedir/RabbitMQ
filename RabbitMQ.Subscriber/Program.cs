@@ -15,25 +15,27 @@ internal class Program
 
         var channel = connection.CreateModel();
 
+        var randomQueueName = channel.QueueDeclare().QueueName;
+
+        channel.QueueBind(randomQueueName, "logs-fanout", "", null);
+
         channel.BasicQos(0, 1, false);
-        //herbir subs. bir mesaj gönderecek.
 
         var consumer = new EventingBasicConsumer(channel);
 
-        channel.BasicConsume("hello-queue", false, consumer);
+        channel.BasicConsume(randomQueueName, false, consumer);
 
-        consumer.Received += (sender,e) =>
+        Console.WriteLine("Logları dinleniyor...");
+
+        consumer.Received += (object sender, BasicDeliverEventArgs e) =>
         {
             var message = Encoding.UTF8.GetString(e.Body.ToArray());
 
             Thread.Sleep(1500);
-
-            Console.WriteLine("Gelen Mesaj: " + message);
+            Console.WriteLine("Gelen Mesaj:" + message);
 
             channel.BasicAck(e.DeliveryTag, false);
         };
-
-        Console.ReadLine();
+        Console.ReadLine(); 
     }
-
 }
