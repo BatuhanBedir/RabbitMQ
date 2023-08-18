@@ -20,7 +20,13 @@ internal class Program
         channel.BasicQos(0, 1, false);
         var consumer = new EventingBasicConsumer(channel);
 
-        var queueName = "direct-queue-Critical";
+        var queueName = channel.QueueDeclare().QueueName;
+
+        //var routeKey = "*.*.Warning";
+        var routeKey = "Info.#";
+
+        channel.QueueBind(queueName, "logs-topic", routeKey);
+
         channel.BasicConsume(queueName, false, consumer);
 
         Console.WriteLine("Logları dinleniyor...");
