@@ -22,28 +22,19 @@ internal class Program
 
         var channel = connection.CreateModel();
 
-        channel.ExchangeDeclare("logs-topic", durable: true, type: ExchangeType.Topic);
+        channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
+        Dictionary<string, object> headers = new Dictionary<string, object>();
 
-        Random rnd = new Random();
-        Enumerable.Range(1, 50).ToList().ForEach(x =>
-        {
-            LogNames log1 = (LogNames)rnd.Next(1, 5);
-            LogNames log2 = (LogNames)rnd.Next(1, 5);
-            LogNames log3 = (LogNames)rnd.Next(1, 5);
+        headers.Add("format", "pdf");
+        headers.Add("shape", "a4");
 
-            var routeKey = $"{log1}.{log2}.{log3}";
+        IBasicProperties properties = channel.CreateBasicProperties();
+        properties.Headers = headers;
 
-            string message = $"log-type : {log1}-{log2}-{log3}";
+        channel.BasicPublish("header-exchange", string.Empty, properties,Encoding.UTF8.GetBytes("header message"));
 
-            var messageBody = Encoding.UTF8.GetBytes(message);
-
-            channel.BasicPublish("logs-topic", routeKey, null, messageBody);
-
-            Console.WriteLine($"Mesaj gönderilmiştir : {message}");
-
-        });
-
+        Console.WriteLine("Message has been sent");
         Console.ReadLine();
     }
 }
