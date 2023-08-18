@@ -31,6 +31,7 @@ internal class Program
 
         IBasicProperties properties = channel.CreateBasicProperties();
         properties.Headers = headers;
+        properties.Persistent = true; //mesajlar kalıcı hale gelir.
 
         channel.BasicPublish("header-exchange", string.Empty, properties,Encoding.UTF8.GetBytes("header message"));
 
