@@ -2,6 +2,8 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.IO;
+using Shared;
+using System.Text.Json;
 
 namespace RabbitMQ.Subscriber;
 
@@ -24,12 +26,12 @@ internal class Program
 
         var queueName = channel.QueueDeclare().QueueName;
 
-        Dictionary<string,object> headers = new Dictionary<string, object>();
+        Dictionary<string, object> headers = new Dictionary<string, object>();
         headers.Add("format", "pdf");
         headers.Add("shape", "a4");
         headers.Add("x-match", "all");
 
-        channel.QueueBind(queueName, "header-exchange", string.Empty,headers);
+        channel.QueueBind(queueName, "header-exchange", string.Empty, headers);
 
         channel.BasicConsume(queueName, false, consumer);
 
@@ -39,13 +41,16 @@ internal class Program
         {
             var message = Encoding.UTF8.GetString(e.Body.ToArray());
 
+            Product product = JsonSerializer.Deserialize<Product>(message);
+
             Thread.Sleep(1500);
-            Console.WriteLine("Gelen Mesaj:" + message);
+
+            Console.WriteLine("Gelen Mesaj: " + product.Id + "-" + product.Name + "-" + product.Price + "-" + product.Stock);
 
             channel.BasicAck(e.DeliveryTag, false);
         };
 
 
-        Console.ReadLine(); 
+        Console.ReadLine();
     }
 }
